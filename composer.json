@@ -1,0 +1,33 @@
+{
+    "name": "bfg/object",
+    "description": "To work with objects and arrays",
+    "type": "bfg-app",
+    "keywords": ["laravel", "extension", "object"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "bfg"
+        }
+    ],
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.0.0",
+        "bfg/installer": "*"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Bfg\\Object\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bfg\\Object\\ServiceProvider"
+            ]
+        }
+    }
+}
