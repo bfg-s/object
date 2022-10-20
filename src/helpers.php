@@ -1,6 +1,18 @@
 <?php
 
-if (!function_exists('pipeline')) {
+if (! function_exists('gag')) {
+    /**
+     * @param  string|null  $name
+     * @param ...$arguments
+     * @return mixed
+     */
+    function gag(string $name = null, ...$arguments): mixed
+    {
+        return \Bfg\Object\Gag::create($name, ...$arguments);
+    }
+}
+
+if (! function_exists('pipeline')) {
     /**
      * The organization of pipeline is the same as
      * it is implemented by middleware Laravel.
@@ -18,7 +30,7 @@ if (!function_exists('pipeline')) {
     }
 }
 
-if (!function_exists("is_call")) {
+if (! function_exists('is_call')) {
     /**
      * When this is called an item.
      *
@@ -27,11 +39,11 @@ if (!function_exists("is_call")) {
      */
     function is_call(mixed $subject): bool
     {
-        return (is_array($subject) && is_callable($subject) || $subject instanceof Closure);
+        return is_array($subject) && is_callable($subject) || $subject instanceof Closure;
     }
 }
 
-if (!function_exists("is_assoc")) {
+if (! function_exists('is_assoc')) {
     /**
      * Check whether an array is associative.
      *
@@ -43,16 +55,17 @@ if (!function_exists("is_assoc")) {
         if ([] === $arr) {
             return false;
         }
+
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }
 
-if (!function_exists("array_merge_recursive_distinct")) {
+if (! function_exists('array_merge_recursive_distinct')) {
     /**
      * array_merge_recursive does indeed merge arrays, but it converts values with duplicate
      * keys to arrays rather than overwriting the value in the first array with the duplicate
      * value in the second array, as array_merge does. I.e., with array_merge_recursive,
-     * this happens (documented behavior):
+     * this happens (documented behavior):.
      *
      * array_merge_recursive(array('key' => 'org value'), array('key' => 'new value'));
      *     => array('key' => array('org value', 'new value'));
@@ -78,10 +91,10 @@ if (!function_exists("array_merge_recursive_distinct")) {
         $merged = $array1;
 
         foreach ($array2 as $key => &$value) {
-            if (is_array($value) && isset ($merged [$key]) && is_array($merged [$key])) {
-                $merged [$key] = array_merge_recursive_distinct($merged [$key], $value);
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+                $merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
             } else {
-                $merged [$key] = $value;
+                $merged[$key] = $value;
             }
         }
 
@@ -89,7 +102,7 @@ if (!function_exists("array_merge_recursive_distinct")) {
     }
 }
 
-if (!function_exists('array_dots_uncollapse')) {
+if (! function_exists('array_dots_uncollapse')) {
     /**
      * Expand an array folded into a dot array.
      *
@@ -108,9 +121,9 @@ if (!function_exists('array_dots_uncollapse')) {
     }
 }
 
-if (!function_exists('multi_dot_call')) {
+if (! function_exists('multi_dot_call')) {
     /**
-     * Access to an object or/and an array using the dot path method
+     * Access to an object or/and an array using the dot path method.
      *
      * @param $obj
      * @param  string  $dot_path
@@ -123,7 +136,7 @@ if (!function_exists('multi_dot_call')) {
     }
 }
 
-if (!function_exists('eloquent_instruction')) {
+if (! function_exists('eloquent_instruction')) {
     /**
      * [ ==|=|is  (VALUE)] = where('name', '=', 'value')
      * [ <=       (VALUE)] = where('name', '<=', 'value')
@@ -137,16 +150,16 @@ if (!function_exists('eloquent_instruction')) {
      * [ in       (VALUE)] = whereIn('name', explode(';', 'value;value...'))
      * [ not in   (VALUE)] = whereNotIn('name', explode(';', 'value;value...'))
      * [ not null (VALUE)] = whereNotNull('name')
-     * [ null     (VALUE)] = whereNull('name')
+     * [ null     (VALUE)] = whereNull('name').
      *
      * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation|\Illuminate\Database\Eloquent\Builder|array|string  $eloquent
      * @param  array  $instructions
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation
      */
     function eloquent_instruction(
-        \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation|\Illuminate\Database\Eloquent\Builder|array|string $eloquent,
+        Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation|\Illuminate\Database\Eloquent\Builder|array|string $eloquent,
         array $instructions
-    ): \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation|\Illuminate\Database\Eloquent\Builder {
+    ): Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation|\Illuminate\Database\Eloquent\Builder {
         return \Bfg\Object\Accessor::create($eloquent)->eloquentInstruction($instructions);
     }
 }

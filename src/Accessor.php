@@ -3,16 +3,16 @@
 namespace Bfg\Object;
 
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * Class Accessor
+ * Class Accessor.
  * @package Bfg\Object
  */
-class Accessor {
-
+class Accessor
+{
     /**
      * @var array|object|string
      */
@@ -26,12 +26,8 @@ class Accessor {
     public function __construct(object|array|string $subject)
     {
         if (is_array($subject) || is_object($subject)) {
-
             $this->subject = $subject;
-        }
-
-        else if (is_string($subject)) {
-
+        } elseif (is_string($subject)) {
             $this->subject = new $subject;
         }
     }
@@ -40,7 +36,7 @@ class Accessor {
      * @param  object|array|string  $subject
      * @return Accessor
      */
-    public static function create(object|array|string $subject): Accessor
+    public static function create(object|array|string $subject): self
     {
         return new static($subject);
     }
@@ -58,7 +54,7 @@ class Accessor {
      * [ in       (VALUE)] = whereIn('name', explode(';', 'value;value...'))
      * [ not in   (VALUE)] = whereNotIn('name', explode(';', 'value;value...'))
      * [ not null (VALUE)] = whereNotNull('name')
-     * [ null     (VALUE)] = whereNull('name')
+     * [ null     (VALUE)] = whereNull('name').
      *
      * @param array $instructions
      * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation
@@ -71,68 +67,54 @@ class Accessor {
             $this->subject instanceof Model
         ) {
             foreach ($instructions as $name => $instruction) {
-
                 if ($instruction instanceof \Closure) {
-
                     $result = call_user_func($instruction, $this->subject);
 
                     if ($result) {
-
                         $this->subject = $result;
                     }
-                }
-
-                else if (preg_match('/^\s*([\=\=]{2}|[\=]|[\<\=]{2}|[\>\=]{2}|[\<]|[\>]|[\!\=]{2}|[\!\%]{2}|[\%]like|like[\%]|[\%\%]{2}|[\%]|in|not\sin|not\snull|not|null|like|is|)\s*(.*)/', $instruction, $match)) {
-
+                } elseif (preg_match('/^\s*([\=\=]{2}|[\=]|[\<\=]{2}|[\>\=]{2}|[\<]|[\>]|[\!\=]{2}|[\!\%]{2}|[\%]like|like[\%]|[\%\%]{2}|[\%]|in|not\sin|not\snull|not|null|like|is|)\s*(.*)/', $instruction, $match)) {
                     $option = $match[1];
 
                     $value = $match[2];
 
-                    if (empty($option)) { $option = '='; }
-                    if ($option == '==') { $option = '='; }
-                    if ($option == 'is') { $option = '='; }
-                    if ($option == 'not') { $option = '!='; }
-                    if ($option == 'like') { $option = '%%'; }
-                    if ($option == 'like%') { $option = '!%'; }
-                    if ($option == '%like') { $option = '%'; }
+                    if (empty($option)) {
+                        $option = '=';
+                    }
+                    if ($option == '==') {
+                        $option = '=';
+                    }
+                    if ($option == 'is') {
+                        $option = '=';
+                    }
+                    if ($option == 'not') {
+                        $option = '!=';
+                    }
+                    if ($option == 'like') {
+                        $option = '%%';
+                    }
+                    if ($option == 'like%') {
+                        $option = '!%';
+                    }
+                    if ($option == '%like') {
+                        $option = '%';
+                    }
 
                     if ($option == '=' || $option == '<=' || $option == '>=' || $option == '<' || $option == '>' || $option == '!=') {
-
                         $this->subject = $this->subject->where($name, $option, $value);
-                    }
-
-                    else if ($option == '%%') {
-
+                    } elseif ($option == '%%') {
                         $this->subject = $this->subject->where($name, 'like', "%{$value}%");
-                    }
-
-                    else if ($option == '%') {
-
+                    } elseif ($option == '%') {
                         $this->subject = $this->subject->where($name, 'like', "%{$value}");
-                    }
-
-                    else if ($option == '!%') {
-
+                    } elseif ($option == '!%') {
                         $this->subject = $this->subject->where($name, 'like', "{$value}%");
-                    }
-
-                    else if ($option == 'in') {
-
+                    } elseif ($option == 'in') {
                         $this->subject = $this->subject->whereIn($name, explode(';', $value));
-                    }
-
-                    else if ($option == 'not in') {
-
+                    } elseif ($option == 'not in') {
                         $this->subject = $this->subject->whereNotIn($name, explode(';', $value));
-                    }
-
-                    else if ($option == 'not null') {
-
+                    } elseif ($option == 'not null') {
                         $this->subject = $this->subject->whereNotNull($name);
-                    }
-
-                    else if ($option == 'not null') {
-
+                    } elseif ($option == 'not null') {
                         $this->subject = $this->subject->whereNull($name);
                     }
                 }
@@ -149,21 +131,15 @@ class Accessor {
      */
     public function dotCall(string $path, bool $locale = false): mixed
     {
-        $split = explode(".", $path);
+        $split = explode('.', $path);
 
         foreach ($split as $item) {
-
             try {
-
                 if ($this->subject instanceof \Illuminate\Support\Collection) {
-
                     $this->subject = $this->subject->get($item);
-                }
-
-                else if (is_object($this->subject)) {
-
+                } elseif (is_object($this->subject)) {
                     if (
-                        !$locale &&
+                        ! $locale &&
                         $this->subject instanceof Model &&
                         method_exists($this->subject, 'getTranslations') &&
                         method_exists($this->subject, 'isTranslatableAttribute')
@@ -184,20 +160,14 @@ class Accessor {
                             $this->subject = $this->subject->{$item}();
                         }
                     }
-                }
-
-                else if (is_array($this->subject)) {
-
+                } elseif (is_array($this->subject)) {
                     $this->subject = $this->subject[$item] ?? null;
                 }
 
                 if ($this->subject === null) {
-
                     return null;
                 }
-
             } catch (Exception $exception) {
-
                 return null;
             }
         }

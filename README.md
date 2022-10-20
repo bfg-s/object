@@ -2,6 +2,157 @@
 
 To work with objects and arrays.
 
+## GAG Object
+The Gag object is designed for recursive data filling and the construction 
+of circuits and its children from the repartition that can be automatically 
+filling. Standard Gag Object connects all classes in the `app/Gags` folder, 
+all the classes are parsed there automatically fall into the Gag storage.
+
+By default, there is already a harvested Gag object `Bfg\Object\Gag` 
+which you can use globally for your needs. There is also the opportunity 
+to create its own Gag collection.
+
+Consider the situation with the filling of the standard GAG object:
+```php
+\Bfg\Object\Gag::register('gag_name', MyComponent::class);
+\Bfg\Object\Gag::register('gag_next', MyNextComponent::class);
+```
+Implementation methods:
+```php
+public function gag(\Bfg\Object\Gag $gag)
+{
+    $gag->gag_name(...$construct_arguments)
+        ->before(function (...$construct_arguments) {}) 
+        // "before" To call an event before initialization.
+        ->then(function (MyComponent $component, ...$construct_arguments) {})
+        // "then" To call an event after initialization.
+        ->gag_next();
+
+    return $gag;
+}
+```
+And the initializer will enter it:
+```php
+\Bfg\Object\Gag::instance(MyComponent::class, function (
+    MyComponent $component, array $child, ...$construct_arguments
+) {
+    return $component->applyChilds($child);
+});
+```
+If you need to wrap in the GAG already ready component and there is no 
+possibility to overload or replace it, then you can, I added a wrapper 
+for such cases, to the priment, helper `view` is organized through such 
+a wrapper:
+```php
+<?php
+use Bfg\Object\GagCore;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+
+/**
+ * Class ViewComponent
+ * @package Bfg\Layout\BodyComponents
+ */
+class ViewComponent
+{
+    /**
+     * The name of the component in the Gag storage.
+     * 
+     * @var string
+     */
+    static string $name = "view";
+
+    /**
+     * To save in the designer of the object template.
+     * 
+     * @var Application|Factory|View
+     */
+    public Application|Factory|View $view;
+
+    /**
+     * ViewComponent constructor.
+     *
+     * @param  string  $name
+     * @param  array  $data
+     * @param  array  $mergeData
+     */
+    public function __construct(string $name, array $data = [], array $mergeData = [])
+    {
+        $this->view = view($name, $data, $mergeData);
+    }
+    
+    /**
+     * To call an event before initialization.
+     * 
+     * @param ...$construct_arguments
+     */
+    public function gagBefore(...$construct_arguments){
+        //
+    }
+    
+    /**
+     * To call an event after initialization.
+     * 
+     * @param ...$construct_arguments
+     */
+    public function gagThen(...$construct_arguments){
+        //
+    }
+
+    /**
+     * For the use of GAG object to sequence.
+     * 
+     * @param  GagCore  $core
+     * @return string
+     */
+    public function gagApply(GagCore $core): string
+    {
+        return $this->view->with('content', implode('', $core->child))->render();
+    }
+}
+```
+Well, accordingly, if you need to create your Gag object, 
+you can go to the following way:
+```php
+<?php
+
+use Bfg\Object\GagCore;
+
+/**
+ * @mixin \MyGags
+ */
+class MyGag extends GagCore
+{
+    /**
+     * Storage of components
+     * @var array
+     */
+    #[
+        StaticClassStorage('MyComponents'),
+        StaticClassStorage('app/Components', false),
+        DocMethods([Body::class, 'static'], '{key}({value_construct})', 'Storage body gag {key} component'),
+        DocClassName('{class}Gags')
+    ]
+    static array $storage = [];
+
+    /**
+     * Gag instances for subject injection with child
+     * @var array
+     */
+    protected static array $instances = [];
+}
+```
+
+## Static class storage
+This is an attribute that allows you to scan the folder on the 
+files with classes and is the list of them for the Static Properties.
+> Important! The property must be a static public array!
+```php
+#[StaticClassStorage('Components')]
+static array $classes = [];
+```
+
 ## Collection
 Adds to the collection of a `paginate` method, 
 convenient to create a paginator from the collection.
