@@ -6,7 +6,7 @@ if (! function_exists('gag')) {
      * @param ...$arguments
      * @return mixed
      */
-    function gag(string $name = null, ...$arguments): mixed
+    function gag(string|null $name = null, ...$arguments): mixed
     {
         return \Bfg\Object\Gag::create($name, ...$arguments);
     }
